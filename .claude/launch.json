@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "actionspy",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["bin/actionspy", "start", "--foreground"],
+      "port": 3046
+    }
+  ]
+}
