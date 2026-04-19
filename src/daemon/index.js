@@ -3,11 +3,14 @@ import { openDb, closeDb } from '../db.js';
 import { logger } from '../logger.js';
 import { createScheduler } from './scheduler.js';
 import { runZshCollector } from '../collectors/zsh.js';
+import { startServer, stopServer } from '../server.js';
 
 export async function main() {
   process.env.ACTIONSPY_FOREGROUND = process.env.ACTIONSPY_FOREGROUND ?? '1';
   openDb();
   logger.info('daemon starting', { pid: process.pid, db: config.dbPath });
+
+  startServer();
 
   const sched = createScheduler();
 
@@ -27,6 +30,7 @@ export async function main() {
     shuttingDown = true;
     logger.info('daemon stopping', { signal });
     await sched.drain();
+    await stopServer();
     closeDb();
     process.exit(0);
   }

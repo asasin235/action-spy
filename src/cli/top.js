@@ -1,26 +1,11 @@
 import { Table } from 'console-table-printer';
-import { openDb } from '../db.js';
-
-const TYPE_ALIASES = { zsh: 'zsh', app: 'app_focus', browser: 'browser' };
+import { getTop, resolveType } from '../analysis/queries.js';
 
 export async function run(typeArg, opts) {
-  const type = TYPE_ALIASES[typeArg] || typeArg;
+  const type = resolveType(typeArg);
   const days = Number(opts.days) || 14;
   const limit = Number(opts.limit) || 30;
-  const since = Math.floor(Date.now() / 1000) - days * 86400;
-
-  const db = openDb();
-  const rows = db.prepare(`
-    SELECT subject,
-           COUNT(*) AS n,
-           MAX(detail) AS example,
-           MAX(ts) AS last_ts
-    FROM events
-    WHERE type = ? AND ts >= ?
-    GROUP BY subject
-    ORDER BY n DESC
-    LIMIT ?
-  `).all(type, since, limit);
+  const rows = getTop({ type, days, limit });
 
   if (opts.json) {
     console.log(JSON.stringify(rows, null, 2));
