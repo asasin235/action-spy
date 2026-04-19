@@ -51,6 +51,32 @@ async function getJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface SuggestRow {
+  kind: 'command' | 'url' | 'app-pair'
+  what: string
+  count: number
+  days: number
+  example: string | null
+  last_ts: number | null
+  score: number
+}
+export interface SuggestResponse {
+  days: number
+  limit: number
+  rows: SuggestRow[]
+}
+
+export interface TransitionRow {
+  prev_app: string
+  app: string
+  n: number
+  last_ts: number
+}
+export interface TransitionsResponse {
+  days: number
+  rows: TransitionRow[]
+}
+
 export const api = {
   status: () => getJson<StatusResponse>('/api/status'),
   top: (type: EventType, days = 14, limit = 30) =>
@@ -59,4 +85,8 @@ export const api = {
     getJson<TimelineResponse>(`/api/timeline?type=${type}&days=${days}`),
   events: (type: EventType, limit = 50) =>
     getJson<EventsResponse>(`/api/events?type=${type}&limit=${limit}`),
+  suggest: (days = 14, limit = 20) =>
+    getJson<SuggestResponse>(`/api/suggest?days=${days}&limit=${limit}`),
+  transitions: (days = 14, limit = 30) =>
+    getJson<TransitionsResponse>(`/api/transitions?days=${days}&limit=${limit}`),
 };

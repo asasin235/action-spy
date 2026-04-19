@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { Card, StatCard, Skel } from '../components/Card'
 import { TopTable } from '../components/TopTable'
@@ -91,7 +92,7 @@ export default function Dashboard() {
       <Card
         title="Top commands (last 14 days)"
         right={
-          <a href="/commands" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">View all →</a>
+          <Link to="/commands" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">View all →</Link>
         }
       >
         {top.isLoading ? (

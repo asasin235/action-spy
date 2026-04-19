@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard'
 import Commands from './pages/Commands'
 import Apps from './pages/Apps'
 import Browsers from './pages/Browsers'
+import Suggest from './pages/Suggest'
 
 function Nav() {
   const base = 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors'
@@ -14,6 +15,7 @@ function Nav() {
   return (
     <nav className="flex items-center gap-1">
       <NavLink to="/" end className={cls}>Dashboard</NavLink>
+      <NavLink to="/suggest" className={cls}>Suggest</NavLink>
       <NavLink to="/commands" className={cls}>Commands</NavLink>
       <NavLink to="/apps" className={cls}>Apps</NavLink>
       <NavLink to="/browsers" className={cls}>Browsers</NavLink>
@@ -38,6 +40,7 @@ export default function App() {
       <main className="mx-auto max-w-6xl px-6 py-8">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/suggest" element={<Suggest />} />
           <Route path="/commands" element={<Commands />} />
           <Route path="/apps" element={<Apps />} />
           <Route path="/browsers" element={<Browsers />} />

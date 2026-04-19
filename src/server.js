@@ -9,8 +9,9 @@ import {
   getTop,
   getTimeline,
   getRecentEvents,
-  getSuggestions,
 } from './analysis/queries.js';
+import { buildSuggestions } from './analysis/suggest.js';
+import { getAppTransitions } from './analysis/transitions.js';
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.ACTIONSPY_UI_PORT) || 3046;
@@ -110,7 +111,14 @@ function handle(req, res) {
       return json(res, 200, { type, rows: getRecentEvents({ type, limit: q.limit }) });
     }
     if (p === '/api/suggest') {
-      return json(res, 200, getSuggestions({ days: q.days, limit: q.limit }));
+      const days = Number(q.days) || 14;
+      const limit = Number(q.limit) || 20;
+      return json(res, 200, { days, limit, rows: buildSuggestions({ days, limit }) });
+    }
+    if (p === '/api/transitions') {
+      const days = Number(q.days) || 14;
+      const limit = Number(q.limit) || 30;
+      return json(res, 200, { days, rows: getAppTransitions({ days, limit }) });
     }
     if (p.startsWith('/api/')) {
       return json(res, 404, { error: 'unknown endpoint', path: p });
