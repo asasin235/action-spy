@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
 import { execSync, execFileSync } from 'node:child_process';
 import { config } from '../config.js';
 import { openDb } from '../db.js';
@@ -54,4 +56,31 @@ export async function run() {
   } catch (err) {
     fail('SQLite DB', err.message);
   }
+
+  const uiPort = Number(process.env.ACTIONSPY_UI_PORT) || 3046;
+  const reachable = await checkHttp('127.0.0.1', uiPort, '/api/status', 800);
+  if (reachable) {
+    ok('HTTP server reachable', `http://127.0.0.1:${uiPort}/api/status`);
+  } else {
+    warn('HTTP server unreachable', `daemon not running? try \`actionspy start\` (expected on port ${uiPort})`);
+  }
+
+  const webDist = path.join(config.projectRoot, 'web', 'dist', 'index.html');
+  if (fs.existsSync(webDist)) {
+    ok('Dashboard built', webDist);
+  } else {
+    warn('Dashboard not built', 'run `cd web && npm install && npm run build` to build the UI');
+  }
+}
+
+function checkHttp(host, port, urlPath, timeoutMs) {
+  return new Promise((resolve) => {
+    const req = http.request({ host, port, path: urlPath, method: 'GET', timeout: timeoutMs }, (res) => {
+      res.resume();
+      resolve(res.statusCode === 200);
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end();
+  });
 }

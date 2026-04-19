@@ -47,6 +47,12 @@ program
   .description('Check permissions and environment')
   .action(() => import('./doctor.js').then(m => m.run()));
 
+program
+  .command('ui')
+  .description('Open the dashboard (http://localhost:3046) in the default browser')
+  .option('--port <n>', 'override port', '3046')
+  .action((opts) => import('./ui.js').then(m => m.run(opts)));
+
 program.parseAsync().catch(err => {
   console.error(err);
   process.exit(1);
