@@ -32,6 +32,10 @@ export default function Dashboard() {
 
   const totalZsh = status.data?.events_by_type['zsh'] ?? 0
   const lastZsh = status.data?.last_event_ts_by_type['zsh']
+  const totalApp = status.data?.events_by_type['app_focus'] ?? 0
+  const lastApp = status.data?.last_event_ts_by_type['app_focus']
+  const totalBrowser = status.data?.events_by_type['browser'] ?? 0
+  const lastBrowser = status.data?.last_event_ts_by_type['browser']
 
   return (
     <div className="space-y-6">
@@ -67,15 +71,13 @@ export default function Dashboard() {
         />
         <StatCard
           label="App events"
-          value={status.data?.events_by_type['app_focus']?.toLocaleString() ?? '0'}
-          hint="M3 — coming soon"
-          accent="text-zinc-500"
+          value={status.isLoading ? <Skel className="h-8 w-20" /> : totalApp.toLocaleString()}
+          hint={`last: ${relTime(lastApp)}`}
         />
         <StatCard
           label="Browser events"
-          value={status.data?.events_by_type['browser']?.toLocaleString() ?? '0'}
-          hint="M4 — coming soon"
-          accent="text-zinc-500"
+          value={status.isLoading ? <Skel className="h-8 w-20" /> : totalBrowser.toLocaleString()}
+          hint={`last: ${relTime(lastBrowser)}`}
         />
       </div>
 
