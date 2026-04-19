@@ -1,0 +1,20 @@
+{
+  "name": "actionspy",
+  "version": "0.1.0",
+  "description": "Passively tracks repetitive macOS actions (shell commands, app switches, URL visits) and suggests automation candidates for a Stream Deck / macro pad.",
+  "type": "module",
+  "bin": {
+    "actionspy": "bin/actionspy"
+  },
+  "scripts": {
+    "start": "node bin/actionspy start --foreground"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "commander": "^12.1.0",
+    "console-table-printer": "^2.12.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
