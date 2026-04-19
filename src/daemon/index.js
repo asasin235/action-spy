@@ -3,6 +3,7 @@ import { openDb, closeDb } from '../db.js';
 import { logger } from '../logger.js';
 import { createScheduler } from './scheduler.js';
 import { runZshCollector } from '../collectors/zsh.js';
+import { runAppFocusCollector } from '../collectors/app-focus.js';
 import { startServer, stopServer } from '../server.js';
 
 export async function main() {
@@ -21,6 +22,15 @@ export async function main() {
     fn: async () => {
       const res = await runZshCollector();
       if (res.inserted > 0) logger.info('zsh inserted', res);
+    },
+  });
+
+  sched.schedule({
+    name: 'app-focus',
+    intervalMs: config.intervals.appFocusMs,
+    jitterMs: config.intervals.appFocusJitterMs,
+    fn: async () => {
+      await runAppFocusCollector();
     },
   });
 
