@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import Database from 'better-sqlite3';
 import { execSync, execFileSync } from 'node:child_process';
 import { config } from '../config.js';
 import { openDb } from '../db.js';
+import { copyToTemp } from '../util/sqlite-copy.js';
 
 function ok(msg, detail)    { console.log(`[OK]   ${msg.padEnd(32)} ${detail || ''}`); }
 function warn(msg, detail)  { console.log(`[WARN] ${msg.padEnd(32)} ${detail || ''}`); }
@@ -44,8 +46,43 @@ export async function run() {
   try {
     const which = execSync('which pm2', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
     ok('pm2 installed', which);
+    try {
+      const pm2Dump = execSync(`pm2 describe actionspy --no-color`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+      if (pm2Dump.includes('actionspy')) ok('pm2 actionspy registered', 'use `actionspy status`');
+    } catch {
+      warn('pm2 actionspy not registered', 'run `actionspy start` to register');
+    }
+    try {
+      const saved = fs.existsSync(path.join(process.env.HOME || '', '.pm2', 'dump.pm2'));
+      if (saved) ok('pm2 save/startup', 'dump.pm2 present (may survive reboot)');
+      else warn('pm2 startup not configured', 'run `pm2 save && pm2 startup` for reboot survival');
+    } catch { /* ignore */ }
   } catch {
     warn('pm2 not installed', 'install with `npm i -g pm2` if you want supervised mode');
+  }
+
+  for (const [name, src] of Object.entries(config.browsers)) {
+    if (!fs.existsSync(src)) {
+      warn(`${name} history`, 'not installed — skipping');
+      continue;
+    }
+    const tmp = path.join(config.tmpDir, `probe-${name}.db`);
+    try {
+      await copyToTemp(src, tmp);
+      const d = new Database(tmp, { readonly: true, fileMustExist: true });
+      d.prepare('SELECT 1').get();
+      d.close();
+      ok(`${name} history readable`, 'Full Disk Access OK');
+    } catch (err) {
+      fail(
+        `${name} history NOT readable`,
+        `grant Full Disk Access to ${process.execPath} — System Settings → Privacy & Security → Full Disk Access`
+      );
+    } finally {
+      try { fs.unlinkSync(tmp); } catch { /* ignore */ }
+      try { fs.unlinkSync(tmp + '-wal'); } catch { /* ignore */ }
+      try { fs.unlinkSync(tmp + '-shm'); } catch { /* ignore */ }
+    }
   }
 
   try {

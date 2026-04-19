@@ -4,6 +4,7 @@ import { logger } from '../logger.js';
 import { createScheduler } from './scheduler.js';
 import { runZshCollector } from '../collectors/zsh.js';
 import { runAppFocusCollector } from '../collectors/app-focus.js';
+import { runBrowserCollector } from '../collectors/browser.js';
 import { startServer, stopServer } from '../server.js';
 
 export async function main() {
@@ -31,6 +32,17 @@ export async function main() {
     jitterMs: config.intervals.appFocusJitterMs,
     fn: async () => {
       await runAppFocusCollector();
+    },
+  });
+
+  sched.schedule({
+    name: 'browser',
+    intervalMs: config.intervals.browserMs,
+    jitterMs: config.intervals.browserJitterMs,
+    fn: async () => {
+      const res = await runBrowserCollector();
+      const inserted = Object.values(res).reduce((s, r) => s + (r?.inserted || 0), 0);
+      if (inserted > 0) logger.info('browser inserted', { total: inserted, ...res });
     },
   });
 
