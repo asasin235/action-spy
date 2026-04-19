@@ -4,11 +4,11 @@ import { openDb } from '../db.js';
 export async function run() {
   let pm2Info = null;
   try {
-    const out = execSync(`pm2 describe actionspy --json`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
-    const parsed = JSON.parse(out);
-    if (Array.isArray(parsed) && parsed.length) pm2Info = parsed[0];
+    const out = execSync(`pm2 jlist`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const all = JSON.parse(out);
+    if (Array.isArray(all)) pm2Info = all.find((p) => p.name === 'actionspy') || null;
   } catch {
-    /* not registered */
+    /* pm2 not installed or not running */
   }
 
   if (pm2Info) {
